@@ -4,6 +4,7 @@
 
 - [CloudFlare - What happens in a TLS Handshake?](https://www.cloudflare.com/learning/ssl/what-happens-in-a-tls-handshake/)
 - [CloudFlare - What is TLS?](https://www.cloudflare.com/learning/ssl/transport-layer-security-tls/)
+- [SSL.com SSl/TLS Handshake](https://www.ssl.com/article/ssl-tls-handshake-ensuring-secure-online-interactions/)
 
 ## What is a TLS Handshake?
 
