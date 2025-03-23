@@ -136,3 +136,122 @@ CMD ["node", "server.js"]
 2. Use `.dockerignore` to exclude unnecessary files from being copied, which can help avoid unnecessary cache invalidations.
 
 ---
+
+> [!IMPORTANT]
+> For every docker command, you can call them using `--help` to see the list of options that command will take
+> ```sh
+> docker ps --help
+> ```
+
+### Understand Docker `attached` and `detached` mode
+
+`Attached` mode is a mode that is default when you run a new container from an image using `docker run` command. In `Attached` mode you'll see the logs of the container because it blocks your terminal with running session.
+
+`Detached` mode on the other hand is running in the background. It means that by running in `detached` mode your session doesn't block your active and current terminal and it will run container in background. When you start an existing container using `docker start` command, by default it will run in `detached` mode.
+
+> [!NOTE]
+> You can also run a new container from an image in `detach` mode by adding extra `-d` flag into `docker run` command:
+> ```sh
+> docker run -d my_back_end_image:1.0.0
+> ```
+
+
+
+### Docker commands
+
+#### docker start <container_name> | <container_id>
+
+This command will **start** `exited` and `existed` container.
+
+##### Flags
+
+- `-a`: Start container in `attach` mode,  **Attach STDOUT/STDERR and forward signals**
+- `-i`: Attach container's STDIN
+
+> [!IMPORTANT]
+> If you have a container that you want to start it and have interact with it using terminal, you can start container by `docker start -ai` flag.
+
+For example, Imagine that you have this code:
+
+```python
+name = input("Enter your name:")
+print(f"Hello {name}")
+```
+
+Imagine that you have built your python image, and then you want to run it, You can run it using:
+
+```sh
+docker run -it hello-python-code:1.0.0
+```
+
+After done, you can re start that container by:
+
+```sh
+docker start -ai hello-python-code:1.0.0
+```
+
+#### docker attach <container_name> | <container_id>
+
+This command will `attach` terminal to running container, by doing this you can see the container logs in your active terminal, but your terminal will block by running session.
+
+#### docker logs <container_name> | <container_id>
+
+Fetch the logs of a container.
+
+##### Flags
+
+- `-f`: Follow the container logs, and attach the terminal to the logs outputted by container
+
+#### docker run <container_name> | <container_id>
+
+Create and run a new container from an image
+
+##### Flags
+
+- `-i` | `--interactive` : Keep STDIN open even it not attached
+- `-t` | `--tty`: Allocate a pseudo-TTY `Means that it will allocate a pseudo terminal to the container for us`
+- `-it`: You can simply run a container in attach mode and interact with container for example `STDIN`
+
+#### docker rm  <container_name> | <container_id>
+
+Remove one or more containers. You can pass container names or ids separated by space, to remove them all
+
+##### Flags
+
+- `-f` | `--force`: Force the removal of a running container
+
+> [!NOTE]
+> For removing all stopped container you can run `docker container prune`
+> It will `Remove all stopped containers`
+
+#### docker container prune
+
+Remove all stopped containers
+
+##### Flags
+
+- `-f` | `--force`: Do not prompt for confirmation
+
+#### docker ps 
+
+List containers
+
+**Aliases:**
+
+```
+docker container ls, docker container list, docker container ps, docker ps
+```
+
+##### Flags 
+- `-a` | `--all`: Show all containers (default shows just running)
+- `-q` | `--quiet`: Only display container IDs
+
+> [!NOTE]
+> A trick for running all stopped containers is to run:
+> ```sh
+> docker rm $(docker ps -aq)
+> ```
+> And for remove all containers, including running ones:
+> ```sh
+> docker rm -f $(docker ps -aq)
+> ```
