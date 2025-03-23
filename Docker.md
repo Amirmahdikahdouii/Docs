@@ -208,10 +208,15 @@ Create and run a new container from an image
 
 ##### Flags
 
+- `-d` | `--detach`: Run container in background and print container ID
 - `-i` | `--interactive` : Keep STDIN open even it not attached
 - `-t` | `--tty`: Allocate a pseudo-TTY `Means that it will allocate a pseudo terminal to the container for us`
 - `-it`: You can simply run a container in attach mode and interact with container for example `STDIN`
-
+- `-p` | `--publish`: Publish a container's port(s) to the host
+- `--restart`: Restart policy to apply when a container exits (default "no"), Example: `docker run --restart=always busybox:latest`
+- `--rm`: Automatically remove the container and its associated anonymous volumes when it exits
+- `--name`: Assign a name to the container
+ 
 #### docker rm  <container_name> | <container_id>
 
 Remove one or more containers. You can pass container names or ids separated by space, to remove them all
@@ -255,3 +260,102 @@ docker container ls, docker container list, docker container ps, docker ps
 > ```sh
 > docker rm -f $(docker ps -aq)
 > ```
+
+
+#### docker rmi <image_name> | <image_id>
+
+Remove one or more images
+
+**Aliases:**
+
+```
+docker image rm, docker image remove, docker rmi
+```
+
+##### Flags 
+- `-f` | `--force`: Force removal of the image
+
+> [!CAUTION]
+> When running `docker rmi`, it only remove images that are not using by any container, even that container is `stopped`. For removing an image even if is attached to a existing container, you must run `docker rmi -f`, **using force flag!**.
+
+#### docker image prune
+
+Remove unused images
+
+##### Flags 
+- `-a` | `--all`: Remove all unused images, not just dangling ones
+- `-f` | `--force`: Do not prompt for confirmation
+
+---
+
+### What are dangling images in docker?
+
+Dangling images in Docker are unused or unreferenced image layers that are no longer associated with any tagged image. They occur when you build, pull, or update Docker images, and the old layers are left behind without being cleaned up. These images are not directly useful and can take up disk space.
+
+### How Dangling Images Are Created:
+1. **Rebuilding an Image**: When you rebuild a Docker image with the same tag, the old image layers become untagged and are left as dangling images.
+2. **Pulling Updated Images**: If you pull a newer version of an image with the same tag, the previous version becomes dangling.
+3. **Intermediate Layers**: During the build process, intermediate layers may be created and left behind if they are not part of the final image.
+
+### Identifying Dangling Images:
+You can list dangling images using the following Docker command:
+```bash
+docker images -f "dangling=true"
+```
+This will show all images that are untagged and not associated with any container.
+
+### Cleaning Up Dangling Images:
+To remove dangling images and free up disk space, you can use:
+```bash
+docker image prune
+```
+
+This command removes all dangling images. If you want to remove unused images (not just dangling ones), you can use:
+
+```bash
+docker image prune -a
+```
+
+Be cautious with `-a`, as it removes all images not associated with a container, including potentially useful ones.
+
+### Preventing Dangling Images:
+- Use unique tags for different versions of your images.
+- Regularly clean up unused images using `docker image prune`.
+- Use multi-stage builds to minimize intermediate layers.
+
+**By managing dangling images, you can keep your Docker environment clean and efficient.**
+
+---
+
+#### docker image inspect <image_name> | <image_id>
+
+Display detailed information on one or more images
+By running this command, you can see a detailed information about that image including `layers`, `entrypoint`, `exposes ports`, ...
+
+#### docker cp 
+
+Copy files/folders between a container and the local filesystem.
+By using this command, you can copy files/folders from your machine to a container or copy something from container to your local filesystem.
+
+**Aliases:**
+
+```
+docker container cp, docker cp
+```
+
+##### Example 1: copy from local filesystem to container
+
+This command will copy everything under the `src/` directory due to `.`, and paste it in my container with name: `my_container_name` and in the `/app` directory.
+
+```sh
+docker cp src/. my_container_name:/app
+```
+
+##### Example 1: copy from container to local filesystem
+
+This command will copy single file `error_logs.log` from my container, to my `src` directory which is located in my local machine.
+
+```sh
+docker cp my_container_name:/app/error_logs.log src/
+```
+
