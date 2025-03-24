@@ -359,3 +359,36 @@ This command will copy single file `error_logs.log` from my container, to my `sr
 docker cp my_container_name:/app/error_logs.log src/
 ```
 
+### Sharing Docker Images
+
+> [!TIP]
+> For sharing dockerized application, we don't share containers at all, but instead, we share images
+> But for sharing images there is 2 way:
+> 1. Share raw Dockerfile
+> 2. Share built image
+
+1. Share raw Dockerfile:
+
+By sharing a raw Dockerfile, we also should contain our dependencies for building image to share with Dockerfile, like source code.
+
+2. Share built image:
+
+For sharing a built image, we just need to access the built image and no dependencies are required, because they are already existed in built image.
+To share a built image there is 2 way:
+
+- Sharing with DockerHub (Public registery)
+- Sharing with Private registeries
+
+#### docker push <image_name>
+
+Upload an image to a registry
+
+#### docker pull <image_name>
+
+Download an image from a registry
+
+> [!WARNING]
+> If you want to push or pull from a private registery, you have to include the private registery url before the image name
+> By default, if you don't modify tag for a image to pull, it download the `latest` image tag **by default**.
+
+---
