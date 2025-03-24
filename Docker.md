@@ -468,3 +468,33 @@ in which case the anonymous volume associated with the container is destroyed.
 docker run --mount type=volume,src=<volume-name>,dst=<mount-path>
 docker run -v <volume-name>:<mount-path>
 ```
+
+### How to make a anonymous volume in Dockerfile
+
+```dockerfile
+VOLUME ["/app"]
+```
+
+Imagine that you have a `NodeJS` application and you want to bind it to the root path in the container, but by doing this, the node_modules and 
+every thing that is made by image, will be disappear, cause of `bind mount`.
+For fixing this issue:
+
+```Dockerfile
+FROM node:22
+
+WORKDIR /app
+
+COPY package.json /app
+
+RUN npm install 
+
+VOLUME ["/app/node_modules"]
+
+CMD ["node", "server.js"]
+```
+
+And then, you can run the built image by:
+
+```sh
+docker run -v /path/to/your/project:/app your_built_image:latest
+```
