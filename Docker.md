@@ -498,3 +498,66 @@ And then, you can run the built image by:
 ```sh
 docker run -v /path/to/your/project:/app your_built_image:latest
 ```
+
+> [!CAUTION]
+> When you use `bind mounts` keep in mind that everything in the mounted directory in container, will replace by data from host machine, not overriden but replace.
+> But in `volumes`, if you mount a directory containing files and data in the container, they will be copy into the mounted volume. 
+> Even though, you can mount a volume with `no-copy` extra falg for avoid this copy. see this [doc](https://docs.docker.com/engine/storage/volumes/#options-for---volume)
+
+> [!TIP]
+> Anonymous volumes as I mentioned are useful when you're bind a directory, to a path in container, **which already has data**, and you want to `keep` that existing data in the container.
+
+> [!NOTE]
+> Anonymous volumes will remain even after container shutdown, but if you run the container using `--rm` flag, they will removed by stopping container, just like as container removes.
+
+### Docker volume commands
+
+#### docker volume prune
+
+Remove unused local volumes
+
+```sh
+docker volume prune
+```
+
+##### Flags
+
+- `-a` | `--all`: Remove all unused volumes, not just anonymous ones
+- `-f` | `--force`: Do not prompt for confirmation
+
+#### docker volume rm
+
+Remove one or more volumes. You cannot remove a volume that is in use by a container
+
+
+##### Flags
+
+- `-f` | `--force`: Force the removal of one or more volumes
+
+#### docker volume inspect
+
+Display detailed information on one or more volumes
+
+```sh
+docker volume inspect
+```
+
+#### docker volume ls
+
+List volumes
+
+```sh
+docker volume ls
+```
+
+#### docker volume create
+
+Create a volume
+
+```sh
+docker volume create <volume-name>
+```
+![Docker container data types](./assets/images/docker-container-data-types.png)
+
+![Docker container data types differences](./assets/images/docker-container-data-types-differences.png)
+
