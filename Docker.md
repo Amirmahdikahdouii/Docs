@@ -561,3 +561,75 @@ docker volume create <volume-name>
 
 ![Docker container data types differences](./assets/images/docker-container-data-types-differences.png)
 
+### Docker ENV vs Docker ARGS
+
+| ENV | ARG |
+| --- | --- |
+| Available inside a `Dockerfile`, Not accessible in CMD or any application code | Available inside of a `Dockerfile` and in Application code |
+| Set on image build (docker build) via `--build-arg` | Set via `ENV` in Dockerfile or via `--env` or `-e` on `docker run` |
+
+Example of usage:
+
+```dockerfile
+ENV PORT 8000
+
+EXPOSE $PORT
+```
+
+We can also change it for running a container by:
+
+```sh
+docker run -e PORT=8080 your_image
+```
+
+
+```sh
+docker run --env PORT=8080 your_image
+```
+
+Or, set it in a file and pass the file to the container by `--env-file` tag:
+
+- **.env:**
+
+```env
+PORT=8080
+```
+
+- **Running container:**
+
+```sh
+docker run --env-file ./.env your_image
+```
+
+But for docker Arguments, as I mentioned arguments are build time variables, and they are not allowed to modify in runtime.
+
+For example, we can set a default port for an image:
+
+```dockerfile
+# You can set a optional default value when define a argument!
+
+ARG DEFAULT_PORT 80
+
+EXPOSE $DEFAULT_PORT
+```
+
+And also you can change the `DEFAULT_PORT` when you're build the image:
+
+```sh
+docker build --build-arg DEFAULT_PORT=8000
+```
+
+> [!TIP]
+> You can combine `ARG` and `ENV` to be used together:
+
+```dockerfile
+ARG DEFAULT_PORT 8000
+
+ENV PORT $DEFAULT_PORT
+
+EXPOSE $PORT
+```
+
+And now, you can modify your port that want to expose, in `runtime` and `build time`, both!
+
+---
