@@ -261,7 +261,7 @@ func generateNumbers(ch <- chan int, wg *sync.WaitGroup){
     }
 }
 
-func printNumbers(ch <-chan int, wg *sync.WaitGroup){
+func printNumbers(ch chan <- int, wg *sync.WaitGroup){
     defer wg.Done()
 
     for  num := range ch {
@@ -288,7 +288,7 @@ func main(){
 > Both functions above, either has read-only or write-only access to the channel, but they could access both read and write into channel, by declare them like `ch chan int`.
 > But, giving both read and write access to each function, could lead your program into [`dead lock`](https://en.wikipedia.org/wiki/Deadlock)
 > A deadlock can happen when one part of a program is waiting for another part of the program to do something, but that other part of the program is also waiting for the first part of the program to finish. Since both parts of the program are waiting on each other, the program will never continue running.
-> The deadlock can happen due to the way channel communication works in Go. When part of a program is writing to a channel, it will wait until another part of the program reads from that channel before continuing on. Similarly, if a program is reading from a channel it will wait until another part of the program writes to that channel before it continues. A part of a program waiting on something else to happen is said to be blocking because it’s blocked from continuing until something else happens. Channels block when they are being written to or read from. So if you have a function where you’re expecting to write to a channel but accidentally read from the channel instead, your program may enter a deadlock because the channel will never be written to. Ensuring this never happens is one reason to use a `chan<- int` or a `<-chan int` instead of just a `chan int`.
+> The deadlock can happen due to the way channel communication works in Go. When part of a program is writing to a channel, it will wait until another part of the program reads from that channel before continuing on. Similarly, if a program is reading from a channel it will wait until another part of the program writes to that channel before it continues. A part of a program waiting on something else to happen is said to be blocking because it’s blocked from continuing until something else happens. Channels block when they are being written to or read from. So if you have a function where you’re expecting to write to a channel but accidentally read from the channel instead, your program may enter a deadlock because the channel will never be written to. Ensuring this never happens is one reason to use a `chan <- int` or a `<- chan int` instead of just a `chan int`.
 
 > [!WARNING]
 > One other important aspect of the updated code is using `close()` to close the channel once it's done being written to by `generateNumbers`. In this program, `close()` causes the `for ... range` loop in `printNumbers` to exit. Since using `range` to read from a channel continues until the channel it's reading from is closed, if close isn't called on `numberChan` then `printNumbers` will **never finish**. If `printNumbers` never finishes, the **WaitGroup's Done method will never be called** by the defer when `printNumbers` exits. If the Done method is never called from `printNumbers`, the program itself will never exit because the WaitGroup's Wait method in the main function will never continue.
