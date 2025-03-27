@@ -633,3 +633,383 @@ EXPOSE $PORT
 And now, you can modify your port that want to expose, in `runtime` and `build time`, both!
 
 ---
+
+## Docker Networks
+
+### Types of networks in docker
+
+Imagine that you have a docker container, each of these senarios are possible for your container to happen:
+
+1. **Connect to a world API:** your application might want to connect to internet, for example for fetch something from an API
+2. **Connect to your host machine**: Your app might want to connect to something running on your host machine, for example connect to a MongoDB that is running in your machine.
+3. **Connect to another container**: Your application might want to connect to another docker container, for example a `Redis DB` container.
+
+> [!NOTE]
+> In the case `Connect to a world API`, containers don't need any special setup, and they works fine. We just need to implement some setup and configs for other 2 ways of communications.
+
+---
+
+- **Connect to host machine**
+
+For connecting to the host machine, docker gives us a special URL for simplify the communication building.
+Imagine that From container I want to get connect to a `Redis` running in my machine.
+The `Redis` url in previous was:
+
+```sh
+redis://localhost:6379
+```
+
+But now, for running from container I just need to replace the `localhost` with `host.docker.internal`. So the new URL would be:
+
+```sh
+redis://host.docker.internal:6379
+```
+
+> [!NOTE]
+> By setting `host.docker.internal`, Docker will replace the host IP address with this special URL, so the communication will working
+
+---
+
+- **Connect to another container**
+
+For communication with another container, there are 2 ways:
+
+1. Using container IP address
+
+You can get inspect of your container, then Find the IP Address of container and put it in your container that want to create connection.
+
+```sh
+docker container inspect 
+```
+
+It will give you something like this:
+
+```sh
+[
+    {
+        "Id": "f4bd4cc9f44720fba7f258afdcfd5a86d4c4cc3a10eb938cb6b9004844128d73",
+        "Created": "2025-03-24T16:00:11.760229737Z",
+        "Path": "docker-entrypoint.sh",
+        "Args": [
+            "redis-server"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 2656,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2025-03-27T12:36:22.514224694Z",
+            "FinishedAt": "2025-03-27T09:00:02.899868098Z"
+        },
+        "Image": "sha256:8d7a968b2bafc1c56e6fe76b0ddc256eeed9b350ee32dcafe3bddea7700fbe38",
+        "ResolvConfPath": "/var/lib/docker/containers/f4bd4cc9f44720fba7f258afdcfd5a86d4c4cc3a10eb938cb6b9004844128d73/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/f4bd4cc9f44720fba7f258afdcfd5a86d4c4cc3a10eb938cb6b9004844128d73/hostname",
+        "HostsPath": "/var/lib/docker/containers/f4bd4cc9f44720fba7f258afdcfd5a86d4c4cc3a10eb938cb6b9004844128d73/hosts",
+        "LogPath": "/var/lib/docker/containers/f4bd4cc9f44720fba7f258afdcfd5a86d4c4cc3a10eb938cb6b9004844128d73/f4bd4cc9f44720fba7f258afdcfd5a86d4c4cc3a10eb938cb6b9004844128d73-json.log",
+        "Name": "/how_much_is_it_crawler_redis",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "how-much-is-it-crawler_default",
+            "PortBindings": {
+                "6379/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "6380"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "always",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": [],
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware",
+                "/sys/devices/virtual/powercap"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/c3666ef6622328266e6e384361edb73c26de1da4e27debe250f5cd6308b423a2-init/diff:/var/lib/docker/overlay2/17ad12819f94801095aa888741e1cd4b6560566199590e2e29831cc6cb6ea565/diff:/var/lib/docker/overlay2/a4a3ee100ddd48ca59d354479d012607f00283f1461e21571e2e353f0a75dea4/diff:/var/lib/docker/overlay2/ae2bf0cdf2d3801c206c8d5e24fc6e0dc3bfc49409b470d649507a278aedf2c9/diff:/var/lib/docker/overlay2/3b5161f5502fac8a5fd9326d52d9fe13b2a3ff1502dcf830c31b553dd377ea58/diff:/var/lib/docker/overlay2/b29a2a8856ee8e0bcf77acbbc5859fa3d8daeed7938727f1d899de81ce4f9f3d/diff:/var/lib/docker/overlay2/b87cafeeb5f6d2e137f8a17f298b7978fa32379fa9e65d05f0f081fec18f22f6/diff:/var/lib/docker/overlay2/a5b4e307439248efa40409ad6541411373328f76cf683f500ad0ea111f0f5370/diff:/var/lib/docker/overlay2/82aa5620ca52e86d0d82c271b2c132866c08964c7fd7329b5f8d3af20012d0fd/diff",
+                "MergedDir": "/var/lib/docker/overlay2/c3666ef6622328266e6e384361edb73c26de1da4e27debe250f5cd6308b423a2/merged",
+                "UpperDir": "/var/lib/docker/overlay2/c3666ef6622328266e6e384361edb73c26de1da4e27debe250f5cd6308b423a2/diff",
+                "WorkDir": "/var/lib/docker/overlay2/c3666ef6622328266e6e384361edb73c26de1da4e27debe250f5cd6308b423a2/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "81cba4db76389192aa23e22ad095239e1365a253aba02ef6746bca654d711394",
+                "Source": "/var/lib/docker/volumes/81cba4db76389192aa23e22ad095239e1365a253aba02ef6746bca654d711394/_data",
+                "Destination": "/data",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+        "Config": {
+            "Hostname": "f4bd4cc9f447",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "ExposedPorts": {
+                "6379/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PRICE_SOURCE_URL=https://www.tgju.org/",
+                "REDIS_PORT=6380",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "GOSU_VERSION=1.17",
+                "REDIS_VERSION=6.2.17",
+                "REDIS_DOWNLOAD_URL=http://download.redis.io/releases/redis-6.2.17.tar.gz",
+                "REDIS_DOWNLOAD_SHA=f7aab300407aaa005bc1a688e61287111f4ae13ed657ec50ef4ab529893ddc30"
+            ],
+            "Cmd": [
+                "redis-server"
+            ],
+            "Image": "redis:6-alpine",
+            "Volumes": {
+                "/data": {}
+            },
+            "WorkingDir": "/data",
+            "Entrypoint": [
+                "docker-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": {
+                "com.docker.compose.config-hash": "2923ab6e70532c038c888eb1b995c5846d751bd0b3594054ef546cee6d8faaa2",
+                "com.docker.compose.container-number": "1",
+                "com.docker.compose.depends_on": "",
+                "com.docker.compose.image": "sha256:8d7a968b2bafc1c56e6fe76b0ddc256eeed9b350ee32dcafe3bddea7700fbe38",
+                "com.docker.compose.oneoff": "False",
+                "com.docker.compose.project": "how-much-is-it-crawler",
+                "com.docker.compose.project.config_files": "/home/amir/Desktop/How-Much-Is-It-Crawler/docker-compose.yml",
+                "com.docker.compose.project.working_dir": "/home/amir/Desktop/How-Much-Is-It-Crawler",
+                "com.docker.compose.service": "redis",
+                "com.docker.compose.version": "2.32.4"
+            }
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "186b1a9509cc13d30411e33746faf6af2c7eac1bad955e913257617ea8cb2b3f",
+            "SandboxKey": "/var/run/docker/netns/186b1a9509cc",
+            "Ports": {
+                "6379/tcp": [
+                    {
+                        "HostIp": "0.0.0.0",
+                        "HostPort": "6380"
+                    },
+                    {
+                        "HostIp": "::",
+                        "HostPort": "6380"
+                    }
+                ]
+            },
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "",
+            "Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "MacAddress": "",
+            "Networks": {
+                "how-much-is-it-crawler_default": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "how_much_is_it_crawler_redis",
+                        "redis"
+                    ],
+                    "MacAddress": "02:42:ac:18:00:02",
+                    "DriverOpts": null,
+                    "NetworkID": "9955724e664a1ad30fe9df5151efb871e19e910da50417377b9145643a9e0588",
+                    "EndpointID": "9c85872bb921838be85ad2f97b84acd44d6d2f202a42e64fcb11192db5b3f7bd",
+                    "Gateway": "172.24.0.1",
+                    "IPAddress": "172.24.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "how_much_is_it_crawler_redis",
+                        "redis",
+                        "f4bd4cc9f447"
+                    ]
+                }
+            }
+        }
+    }
+]
+
+```
+
+You can find the `IPAddress` in `Networks` and put it in your container.
+
+2. Using container name:
+
+#### Introducing docker network
+
+```sh
+docker network
+```
+
+Docker network is a simple way that docker provided for us to make communication between different containers easier.
+By using `docker network`, we can communicate with other containers that are in a same container as our current is.
+
+For creating network:
+
+### docker network create
+
+Creates a network
+
+```sh
+docker network create network_name
+```
+
+### docker network rm
+
+Remove a network
+
+```sh
+docker network rm
+```
+
+### docker network prune
+
+Remove all unused networks
+
+```sh
+docker network prune
+```
+
+---
+
+For simplify the connection between two containers, we can create a network and then register our containers to that network, and then make them connect to each other:
+
+```sh
+docker network create new-network
+```
+
+Run containers:
+
+```sh
+docker run --network new-network --name container1 image1
+docker run --network new-network --name container2 image1
+```
+
+And then for communication between 2 networks, instead of giving IP address, just put the container name.
+
+This is a better solution and best practice. By giving the name of container, docker automatically will replace the container IP address with container name and it will handle the connection.
+
+For example, imagine that I want to connect to redis in my container, I just need to use this URL:
+
+```sh
+redis://my_redis_container_name:6379
+```
+
+![Docker networks Types](./assets/images/docker-networks-type.png)
+
+![Docker Network](./assets/images/docker-networks.png)
