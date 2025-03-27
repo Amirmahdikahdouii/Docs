@@ -1013,3 +1013,7 @@ redis://my_redis_container_name:6379
 ![Docker networks Types](./assets/images/docker-networks-type.png)
 
 ![Docker Network](./assets/images/docker-networks.png)
+
+> [!IMPORTANT]
+> Docker does not change anything on your `source code`. Instead docker owns the containers and it can manage the outgoing request to resolve them if the container name is founded or if you want to connect to host machine using `host.docker.internal`
+
