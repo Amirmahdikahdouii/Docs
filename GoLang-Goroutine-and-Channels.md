@@ -339,3 +339,61 @@ func Serve(queue chan *Request) {
     }
 }
 ```
+
+### Worker pools
+
+#### Sources
+
+| Title | Link |
+| --- | --- |
+| GoByExample | [Link](https://gobyexample.com/worker-pools) |
+| GeeksForGeek | [Link](https://www.geeksforgeeks.org/go-worker-pools/) |
+
+> [!CAUTION]
+> The `worker pools` topic is a basic topic that it is solved by `WaitGroups` in golang, but this note is for whenever we doesn't have any wait group!
+
+A `worker pool` limits the number of concurrent tasks by using a fixed number of workers to process jobs from a queue.
+This prevents excessive Goroutines, reduces memory and CPU usage, and ensures efficient resource management.
+
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func worker(id int, jobs <-chan int, results chan<- int) {
+    for j := range jobs {
+        fmt.Printf("Worker %v Started job %v \n", id, j)
+        time.Sleep(time.Second)
+        fmt.Printf("Worker %v Finished job %v \n", id, j)
+        results <- j
+    }
+}
+
+func main() {
+    maxJobSize := 5
+
+    jobs := make(chan int, maxJobSize)
+    results := make(chan int, maxJobSize)
+
+    for i := 1; i <= 3; i++ {
+        go worker(i, jobs, results)
+    }
+
+    for i := 1; i <= maxJobSize; i++ {
+        jobs <- i
+    }
+
+    close(jobs)
+
+    for i := 1; i <= maxJobSize; i++ {
+        <-results
+    }
+}
+```
+
+**Explain:**
+
+The code above, create 3 workers at first, but workers are waiting for `jobs` channel because at initial `jobs` is empty. Then It fill the jobs channel until it reaches the capacity and then close the channel to make it clear for `worker` that the jobs are done. The `worker` now starts it's job and read data from `jobs` channel, and at the end put the result in `results` channel. After the `worker` responsibility get finish, the `main` function read data from `results` and then reach the end of code.
