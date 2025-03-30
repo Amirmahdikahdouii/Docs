@@ -397,3 +397,141 @@ func main() {
 **Explain:**
 
 The code above, create 3 workers at first, but workers are waiting for `jobs` channel because at initial `jobs` is empty. Then It fill the jobs channel until it reaches the capacity and then close the channel to make it clear for `worker` that the jobs are done. The `worker` now starts it's job and read data from `jobs` channel, and at the end put the result in `results` channel. After the `worker` responsibility get finish, the `main` function read data from `results` and then reach the end of code.
+
+### Atomic counters
+
+One of the other ways for managing state in Go rather than `channels` is using **Atomic counters** from `sync/atomic` package.
+
+> [!NOTE]
+> **What is Atomic concept?**
+> The `atomic` concept in programming refers to operations that are **indivisible** meaning they complete without interference from other operations.
+> This ensures that operations on shared data (like variables) are thread-safe without requiring explicit locking mechanisms such as `sync.Mutex`
+> **How does it work?**
+> Atomic operations work by `leveraging CPU` instructions that ensure certain operations (e.g., incrementing a counter) occur without interruption. When an atomic operation is performed:
+> 1 - The CPU ensures no other thread can modify the data simultaneously.
+> 2 - The operation completes in a single step from the perspective of other threads.
+> **This guarantees consistency and prevents race conditions when multiple goroutines modify shared data.**
+
+The `sync/atomic` package in Golang provides atomic operations for the following **built-in types**:
+
+| **Type**       | **Functions** Available |
+|---------------|------------------------|
+| `int32`      | `AddInt32`, `LoadInt32`, `StoreInt32`, `SwapInt32`, `CompareAndSwapInt32` |
+| `int64`      | `AddInt64`, `LoadInt64`, `StoreInt64`, `SwapInt64`, `CompareAndSwapInt64` |
+| `uint32`     | `AddUint32`, `LoadUint32`, `StoreUint32`, `SwapUint32`, `CompareAndSwapUint32` |
+| `uint64`     | `AddUint64`, `LoadUint64`, `StoreUint64`, `SwapUint64`, `CompareAndSwapUint64` |
+| `uintptr`    | `AddUintptr`, `LoadUintptr`, `StoreUintptr`, `SwapUintptr`, `CompareAndSwapUintptr` |
+| `unsafe.Pointer` | `LoadPointer`, `StorePointer`, `SwapPointer`, `CompareAndSwapPointer` |
+
+- Notes:
+
+1. **No float types (`float32`, `float64`)** : Golang does **not** support atomic operations for floating-point numbers because floating-point operations aren't inherently atomic.
+2. **No `string`, or complex types** : For such types, use **mutexes (`sync.Mutex`)** instead.
+3. **`unsafe.Pointer`** can be used to atomically store and load pointers to structures or other complex data.
+
+#### Usage
+
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+    "sync/atomic"
+)
+
+func main(){
+    var sum atomic.Uint64
+    
+    var wg sync.WaitGroup
+
+    for i := 0; i < 50; i++ {
+        wg.Add(1)
+        go func (){
+            for j := 0; j < 1_000; j++{
+                sum.Add(1)
+            }
+            wg.Done()
+        }()
+    }
+    wg.Wait()
+
+    fmt.Printf("The result is: %v \n", sum.Load())
+}
+```
+
+The code below, first of all create a variable with type `Uint64` from `atomic` and then create a `wait group` for waiting for goroutines to be done and then continue the code. It call 50 goroutines that in every goroutine, we add 1,000 to the `sum` atomic variable, but in a loop. 
+
+For avoiding `data race` we can use atomic `Add()` method to add a value to our variable but atomically.
+Then It wait until all goroutines get done and then print the result, that would be equal to `50,000`.
+
+> [!TIP]
+> We wait for all goroutines to be done, and then fetch the value from out atomic variable, but for insure that we are access the atomic variable safely, we can use `Load()` function to get value.
+> Using Load it's **safe** to **atomically read a value even while other goroutines are (atomically) updating it.**
+
+### Mutexes
+
+- [Understanding mutex](https://www.productteacher.com/quick-product-tips/understanding-mutual-exclusion-mutex)
+- [Mutual exclusion definition](https://nordvpn.com/cybersecurity/glossary/mutual-exclusion/#:~:text=Mutual%20exclusion%20is%20a%20program,to%20use%20in%20concurrent%20programming.)
+- [Mutexes in Golang](https://gobyexample.com/mutexes)
+
+A `Mutex`, short for `mutual exclusion` is a fundamental synchronization primitive used in concurrent programming to manage access to shared resources.
+
+Implementing mutex in golang is super easy:
+
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+type Container struct {
+    Counter     map[string]int
+    mu          sync.Mutex
+}
+
+func (c *Container) inc(name string){
+    c.mu.Lock()
+    defer c.mu.Unlock()
+    c.Counter[name]++
+}
+
+func main(){
+    c := Container{
+        Counter: map[string]int{
+            "a": 0,
+            "b": 0,
+        },
+    }
+
+    var wg sync.WaitGroup
+
+    doIncrement := func (name string, n int){
+        for i := 0; i < n; i++ {
+            c.inc(name)
+        }
+        wg.Done()
+    }
+
+    wg.Add(3)
+    go doIncrement("a", 10000)
+    go doIncrement("a", 10000)
+    go doIncrement("b", 10000)
+
+    wg.Wait()
+
+    fmt.Println(c.Counter)
+}
+```
+
+We have provided a struct for do increment for `counter` in parallel and for avoiding `data race` and conflict between different functions, we use `sync.Mutex` for having and implementing `mutex` in golang. Note that because we want to work on one instance and the `mutex` should be the same instance in every calls, we implement the `inc()` function for pointer of `Container` object.
+
+Before adding data in `counter`, we lock the mutex and `defer` the unlock method to unlock the locked mutex so other goroutines can access writing or reading data.
+
+The output of this code will be:
+
+```text
+map[a: 20000, b: 10000]
+```
