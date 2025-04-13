@@ -193,3 +193,11 @@ The response body contains the resource representation. The server selects an ap
 ### Headers
 
 The response also contains headers or metadata about the response. They give more context about the response and include information such as the server, encoding, date, and content type.
+
+#### Sources
+
+1. [AWS - What is a RESTful API?](https://aws.amazon.com/what-is/restful-api/)
+2. [Postman - What is a RESTful API?](https://blog.postman.com/rest-api-examples/)
+3. [Postman - different type of APIs](https://blog.postman.com/different-types-of-apis/)
+4. [TechTarget - What is RESTful API?](https://www.techtarget.com/searchapparchitecture/definition/RESTful-API)
+5. [Microsoft - Design a RESTful API](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
