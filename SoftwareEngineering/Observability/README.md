@@ -179,3 +179,112 @@ For each request, for every trace that is generated during the responding to a r
 `span_id` are unique in the tracing process, which will be separate each trace from one the other.
 The `parent_id` will store the `span_id` of the parent trace.
 
+
+### Tracer Provider
+
+A `Tracer Provider` (sometimes called TracerProvider) is a **factory for Tracers**. In most applications, a Tracer Provider is initialized once and its **lifecycle matches the application’s lifecycle**.
+Tracer Provider initialization also includes **Resource** and **Exporter** initialization.
+
+
+### Tracer
+
+A **Tracer** creates `spans` containing more information about what is happening for a given operation, such as a request in a service.
+Tracers are created from Tracer Providers.
+
+### Trace Exporters
+
+**Trace Exporters** send traces to a **consumer**.
+This consumer can be standard output for debugging and development-time, the OpenTelemetry Collector, or any open source or vendor backend of your choice.
+
+### Context Propagation
+
+**Context Propagation** is the core concept that enables `Distributed Tracing`.
+With Context Propagation, Spans can be **correlated** with each other and assembled into a trace, regardless of where Spans are generated.
+
+## Spans
+
+A `span` represents a unit of work or operation. Spans are the building blocks of Traces.
+In Open telemetry spans include these informations:
+
+- Name
+- Parent span ID (empty for root spans)
+- Start and End Timestamps
+- Span Context
+- Attributes
+- Span Events
+- Span Links
+- Span Status
+
+> [!NOTE]
+> Spans can be **nested**, as is implied by the presence of a **parent span ID**: child spans represent **sub-operations**. This allows spans to more accurately capture the work done in an application.
+
+### Span Context
+
+Span context is an immutable object on every span that contains the following:
+
+- The `Trace ID` representing the trace that the span is a part of
+- The span’s `Span ID`
+
+### Span Attributes
+
+Attributes are **key-value pairs** that contain `metadata` that you can use to **annotate** a Span to carry information about the operation it is tracking.
+
+You can add attributes to spans **during** or **after** span **creation**.
+**Prefer adding attributes at span creation** to make the attributes available to SDK sampling.
+If you have to add a value after span creation, update the span with the value.
+
+#### Span attributes rules
+
+- Keys must be **non-null** string values
+- Values must be a **non-null** string, boolean, floating point value, integer, or an array of these values
+
+> [!IMPORTANT]
+> There are many standard attributes, for different environemts.
+> The list of attributes are available [here](https://opentelemetry.io/docs/specs/semconv/general/trace/).
+
+### Span Events
+
+A **Span Event** can be thought of as a **structured log message** (or annotation) on a `Span`.
+
+#### When to use span events versus span attributes?
+
+When you’re tracking an **operation** with a `span` and the operation completes, you might want to add data from the operation to your telemetry.
+
+- If the timestamp in which the operation completes is meaningful or relevant, attach the data to a span event.
+- If the timestamp isn’t meaningful, attach the data as span attributes.
+
+### Span Links
+
+Links exist so that you can **associate one span with one or more spans**, implying a causal relationship.
+
+A **Span** may be linked to **zero or more other Spans** (defined by **SpanContext**) that are causally related.
+Links can point to Spans inside a single Trace or across different Traces.
+Links can be used to represent batched operations where a Span was initiated by multiple initiating Spans, each representing a single incoming item being processed in the batch.
+
+### Span status
+
+Each span has a status. The three possible values are:
+
+- Unset
+- Error
+- Ok
+
+The default value is `Unset`. A span status that is **Unset** means that the operation it tracked **successfully completed without an error**.
+
+When a span status is `Error`, then that means some **error occurred in the operation it tracks**.
+For example, this could be due to an `HTTP 500` error on a server handling a request.
+
+When a span status is `Ok`, then that means the span was **explicitly marked as error-free by the developer of an application**.
+> Although this is unintuitive, it’s not required to set a span status as `Ok` when a span is known to have completed without error, as this is covered by **Unset**. 
+
+> [!IMPORTANT]
+> **To reiterate**: `Unset` represents a span that **completed without an error**.
+> `Ok` represents when a developer **explicitly marks a span as successful**.
+> **In most cases, it is not necessary to explicitly mark a span as Ok.**
+
+---
+
+> [!NOTE]
+> The above documentation was from reading [this document](https://opentelemetry.io/docs/concepts/signals/traces/).
+
+---
