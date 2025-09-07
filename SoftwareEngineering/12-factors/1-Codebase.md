@@ -1,5 +1,7 @@
 # 1. Codebase
 
+> One codebase tracked in revision control, many deploys
+
 A **codebase** is any single repo (in a centralized revision control system like Subversion), or any set of repos who share a root commit (in a decentralized revision control system like Git).
 
 There is always a one-to-one correlation between the codebase and the app:
