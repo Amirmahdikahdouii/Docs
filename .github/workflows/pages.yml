@@ -29,15 +29,13 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: /tmp/hugo_cache
-          key: hugo-${{ runner.os }}-${{ hashFiles('go.mod') }}
+          key: hugo-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}
 
       - name: Setup Hugo
-        run: |
-          wget -O hugo.deb https://github.com/gohugoio/hugo/releases/download/v0.139.4/hugo_extended_0.139.4_linux-amd64.deb
-          sudo dpkg -i hugo.deb
-
-      - name: Fetch theme modules
-        run: hugo mod get
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.146.7"
+          extended: true
 
       - name: Build
         run: hugo --minify --gc --cacheDir /tmp/hugo_cache

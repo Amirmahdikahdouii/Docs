@@ -78,7 +78,8 @@ weight: 1
 
 - Open the failed run and read the **Build** job log
 - Common fixes:
-  - Run `hugo mod get -u` locally and commit updated `go.mod` / `go.sum`
+  - Do **not** run `hugo mod get -u` unless you also upgrade Hugo in `.github/workflows/pages.yml` (Hextra requires Hugo >= 0.146.0)
+  - Keep `go.mod` / `go.sum` pinned to a compatible Hextra version
   - Fix broken Markdown or invalid front matter in `content/`
 
 ### Images not loading
