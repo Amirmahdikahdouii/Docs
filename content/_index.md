@@ -1,5 +1,6 @@
 ---
 title: "Amir's Docs"
+type: docs
 ---
 
 Welcome to my personal technical documentation. Notes on software engineering, Go, databases, security, and more.
