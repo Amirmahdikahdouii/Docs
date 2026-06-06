@@ -1,0 +1,29 @@
+{{- $alertTypes := dict
+  "NOTE" (dict "icon" "ℹ️" "class" "hextra-callout-note")
+  "IMPORTANT" (dict "icon" "❗" "class" "hextra-callout-important")
+  "WARNING" (dict "icon" "⚠️" "class" "hextra-callout-warning")
+  "TIP" (dict "icon" "💡" "class" "hextra-callout-tip")
+  "CAUTION" (dict "icon" "⚠️" "class" "hextra-callout-caution")
+-}}
+
+{{- $text := .Text | strings.TrimSpace -}}
+{{- $alertMatch := findRE `^\[!(NOTE|IMPORTANT|WARNING|TIP|CAUTION)\]` $text -}}
+
+{{- if $alertMatch -}}
+  {{- $alertType := index (findRESubmatch `^\[!(NOTE|IMPORTANT|WARNING|TIP|CAUTION)\]` $text) 1 -}}
+  {{- $alert := index $alertTypes $alertType -}}
+  {{- $content := replaceRE `^\[!(NOTE|IMPORTANT|WARNING|TIP|CAUTION)\]\s*` "" $text -}}
+  <blockquote class="hextra-callout {{ $alert.class }} not-prose">
+    <div class="hextra-callout-header">
+      <span class="hextra-callout-icon">{{ $alert.icon }}</span>
+      <span class="hextra-callout-title">{{ $alertType }}</span>
+    </div>
+    <div class="hextra-callout-content">
+      {{ $content | markdownify }}
+    </div>
+  </blockquote>
+{{- else -}}
+  <blockquote>
+    {{ .Text }}
+  </blockquote>
+{{- end -}}

@@ -1,0 +1,56 @@
+.hextra-callout {
+  border-left: 4px solid;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.hextra-callout-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.hextra-callout-content p {
+  margin: 0;
+}
+
+.hextra-callout-note {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.hextra-callout-important {
+  border-color: #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.08);
+}
+
+.hextra-callout-warning,
+.hextra-callout-caution {
+  border-color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.08);
+}
+
+.hextra-callout-tip {
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.08);
+}
+
+html[class~="dark"] .hextra-callout-note {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+html[class~="dark"] .hextra-callout-important {
+  background-color: rgba(139, 92, 246, 0.15);
+}
+
+html[class~="dark"] .hextra-callout-warning,
+html[class~="dark"] .hextra-callout-caution {
+  background-color: rgba(245, 158, 11, 0.15);
+}
+
+html[class~="dark"] .hextra-callout-tip {
+  background-color: rgba(16, 185, 129, 0.15);
+}
